@@ -295,6 +295,16 @@
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Jabatan Lengkap</label>
                     <input type="text" id="empJabatan" placeholder="Contoh: Camat / PENGADMINISTRASI..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Besaran TKD (Rp)</label>
+                        <input type="number" id="empBesaranTKD" placeholder="Contoh: 2156000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">% PPh 21</label>
+                        <input type="number" id="empPph21" step="0.1" placeholder="Contoh: 5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
             </div>
             <button onclick="saveEmployeeData()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-center rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-transform text-xs">
                 Simpan Pegawai
@@ -335,18 +345,18 @@
     <script>
         // Data Awal Pegawai Resmi Lengkap (Gambar 3)
         const initialEmployees = [
-            { id: 1, name: "HESTY PAPUTUNGAN, Amd.Keb", nip: "19770628 200701 2016", gol: "III/c", jabatan: "Camat", type: "struktural" },
-            { id: 2, name: "HOLY REZA PAHLEVI ANI, S.Si", nip: "19820302 201001 1015", gol: "IV/a", jabatan: "Sekretaris Camat", type: "struktural" },
-            { id: 3, name: "CHRISTIAN SYALOOM MARCO DOODOH, S.Pi", nip: "19880626 202203 1 005", gol: "III/a", jabatan: "Kepala Seksi Pemerintahan", type: "struktural" },
-            { id: 4, name: "RISANDI D MOMINTAN, S.KEP", nip: "19900213 201403 1002", gol: "III/c", jabatan: "Kepala Seksi Pembangunan dan Pemberdayaan Masyarakat", type: "struktural" },
-            { id: 5, name: "SAID MUHAMMAD HUD, SS", nip: "19821102 201201 1 001", gol: "III/d", jabatan: "Kepala Seksi Ketenteraman dan Ketertiban", type: "struktural" },
-            { id: 6, name: "HELISTA MODEONG, A.Ma.Pd", nip: "19761107 201408 2 001", gol: "II/d", jabatan: "Kepala Seksi Kesejahteraan Sosial dan Pemberdayaan Perempuan", type: "struktural" },
-            { id: 7, name: "RENA WIDYASARI MONGILONG, SE", nip: "19850829 200902 2002", gol: "III/d", jabatan: "Kepala Seksi Pelayanan Umum", type: "struktural" },
-            { id: 8, name: "DEVIANTI LASABUDA", nip: "19800424 201001 2 011", gol: "III/b", jabatan: "Kepala Sub Bagian Perencanaan, Program, Evaluasi dan Pelaporan", type: "struktural" },
-            { id: 9, name: "ALCEN MOSU, SE", nip: "19850927 200701 2004", gol: "III/d", jabatan: "Kepala Sub Bagian Keuangan, Umum dan Kepegawaian", type: "struktural" },
-            { id: 10, name: "NURIRAWATY LIMBANADI", nip: "19760216 201201 2 001", gol: "II/d", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf" },
-            { id: 11, name: "JEFRI KRISYE ARUNDAA", nip: "19890605 201201 1 001", gol: "II/c", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf" },
-            { id: 12, name: "MUKSIN GOBEL", nip: "19710727 201001 1003", gol: "II/a", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf" }
+            { id: 1, name: "HESTY PAPUTUNGAN, Amd.Keb", nip: "19770628 200701 2016", gol: "III/c", jabatan: "Camat", type: "struktural", besaranTKD: 6800000, pph21: 5 },
+            { id: 2, name: "HOLY REZA PAHLEVI ANI, S.Si", nip: "19820302 201001 1015", gol: "IV/a", jabatan: "Sekretaris Camat", type: "struktural", besaranTKD: 2948000, pph21: 15 },
+            { id: 3, name: "CHRISTIAN SYALOOM MARCO DOODOH, S.Pi", nip: "19880626 202203 1 005", gol: "III/a", jabatan: "Kepala Seksi Pemerintahan", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 4, name: "RISANDI D MOMINTAN, S.KEP", nip: "19900213 201403 1002", gol: "III/c", jabatan: "Kepala Seksi Pembangunan dan Pemberdayaan Masyarakat", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 5, name: "SAID MUHAMMAD HUD, SS", nip: "19821102 201201 1 001", gol: "III/d", jabatan: "Kepala Seksi Ketenteraman dan Ketertiban", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 6, name: "HELISTA MODEONG, A.Ma.Pd", nip: "19761107 201408 2 001", gol: "II/d", jabatan: "Kepala Seksi Kesejahteraan Sosial dan Pemberdayaan Perempuan", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 7, name: "RENA WIDYASARI MONGILONG, SE", nip: "19850829 200902 2002", gol: "III/d", jabatan: "Kepala Seksi Pelayanan Umum", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 8, name: "DEVIANTI LASABUDA", nip: "19800424 201001 2 011", gol: "III/b", jabatan: "Kepala Sub Bagian Perencanaan, Program, Evaluasi dan Pelaporan", type: "struktural", besaranTKD: 2295000, pph21: 5 },
+            { id: 9, name: "ALCEN MOSU, SE", nip: "19850927 200701 2004", gol: "III/d", jabatan: "Kepala Sub Bagian Keuangan, Umum dan Kepegawaian", type: "struktural", besaranTKD: 2156000, pph21: 5 },
+            { id: 10, name: "NURIRAWATY LIMBANADI", nip: "19760216 201201 2 001", gol: "II/d", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf", besaranTKD: 1008000, pph21: 0 },
+            { id: 11, name: "JEFRI KRISYE ARUNDAA", nip: "19890605 201201 1 001", gol: "II/c", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf", besaranTKD: 1008000, pph21: 0 },
+            { id: 12, name: "MUKSIN GOBEL", nip: "19710727 201001 1003", gol: "II/a", jabatan: "PENGADMINISTRASI PERKANTORAN", type: "staf", besaranTKD: 1008000, pph21: 0 }
         ];
 
         // KONFIGURASI DATABASE ONLINE FIREBASE (Diambil dari Gambar Setup Anda)
@@ -366,6 +376,23 @@
             employees = [...initialEmployees];
             localStorage.setItem('tutuyan_pwa_employees', JSON.stringify(employees));
         }
+
+        // Fitur "Jumlah Maksimal TKD Diterima": normalisasi data pegawai lama (sudah tersimpan
+        // sebelum field besaranTKD/pph21 ditambahkan) agar tidak error saat dihitung/ditampilkan.
+        function normalizeEmployeeTKD(list) {
+            return (list || []).map(emp => {
+                if (typeof emp.besaranTKD === 'number' && typeof emp.pph21 === 'number') {
+                    return emp;
+                }
+                const ref = initialEmployees.find(e => e.id === emp.id);
+                return {
+                    ...emp,
+                    besaranTKD: typeof emp.besaranTKD === 'number' ? emp.besaranTKD : (ref ? ref.besaranTKD : 0),
+                    pph21: typeof emp.pph21 === 'number' ? emp.pph21 : (ref ? ref.pph21 : 0)
+                };
+            });
+        }
+        employees = normalizeEmployeeTKD(employees);
 
         let assessments = JSON.parse(localStorage.getItem('tutuyan_pwa_assessments')) || [];
         let config = JSON.parse(localStorage.getItem('tutuyan_pwa_config')) || {
@@ -451,7 +478,7 @@
                     database.ref('employees').on('value', (snapshot) => {
                         const data = snapshot.val();
                         if (data) {
-                            employees = data;
+                            employees = normalizeEmployeeTKD(data);
                             localStorage.setItem('tutuyan_pwa_employees', JSON.stringify(employees));
                         } else {
                             // Jika cloud kosong, upload data awal lokal ke cloud
@@ -566,6 +593,36 @@
                 case 'Buruk': return { min: 0, max: 39 };
                 default: return { min: 0, max: 0 };
             }
+        }
+
+        // ===== FITUR: JUMLAH MAKSIMAL TKD DITERIMA =====
+        // % Potongan Kinerja berdasarkan predikat penilaian (sesuai ketentuan TKD)
+        function getPotonganKinerjaPercent(pred) {
+            switch (pred) {
+                case 'Sangat Baik': return 0;
+                case 'Baik': return 12;
+                case 'Cukup': return 24;
+                case 'Kurang': return 36;
+                case 'Buruk': return 48;
+                default: return 0;
+            }
+        }
+
+        // Rumus: (TKD - (TKD * %PotonganKinerja)) - (TKD - (TKD * %PotonganKinerja)) * %PPh21
+        function hitungTKDDiterima(besaranTKD, pred, pph21) {
+            const tkd = Number(besaranTKD) || 0;
+            const pajak = Number(pph21) || 0;
+            const potonganPersen = getPotonganKinerjaPercent(pred);
+
+            const setelahPotonganKinerja = tkd - (tkd * potonganPersen / 100);
+            const setelahPph21 = setelahPotonganKinerja - (setelahPotonganKinerja * pajak / 100);
+
+            return setelahPph21;
+        }
+
+        function formatRupiah(num) {
+            const val = Math.round(Number(num) || 0);
+            return 'Rp ' + val.toLocaleString('id-ID');
         }
 
         // Mengisi & Menyimpan Penilaian oleh Camat
@@ -693,6 +750,13 @@
                     }
                 }
 
+                const tkdInfoHtml = exist ? `
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 -mt-1">
+                        <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Jumlah Maksimal TKD Diterima</p>
+                        <p class="text-sm font-black text-emerald-700">${formatRupiah(hitungTKDDiterima(emp.besaranTKD, exist.pred, emp.pph21))}</p>
+                    </div>
+                ` : '';
+
                 const cardHtml = `
                     <div class="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 flex flex-col justify-between space-y-4">
                         <div class="flex justify-between items-start">
@@ -705,6 +769,8 @@
                                 <div class="mt-2">${lockStatusText}</div>
                             </div>
                         </div>
+
+                        ${tkdInfoHtml}
 
                         <div class="flex items-center space-x-2 pt-1 border-t border-slate-50">
                             <select id="pred_${emp.id}" ${isLocked ? 'disabled' : ''} class="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-3 px-3.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
@@ -763,6 +829,11 @@
                                 <p class="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-tight">${emp.jabatan} (${emp.gol})</p>
                             </div>
                             <span class="text-[10px] font-black bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">${item.pred}</span>
+                        </div>
+
+                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                            <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Jumlah Maksimal TKD Diterima</p>
+                            <p class="text-sm font-black text-emerald-700">${formatRupiah(hitungTKDDiterima(emp.besaranTKD, item.pred, emp.pph21))}</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-[10px] font-extrabold text-slate-500 pt-2 border-t border-slate-50">
@@ -922,6 +993,7 @@
                             <h4 class="font-bold text-slate-800 text-sm leading-tight">${emp.name}</h4>
                             <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">${emp.jabatan}</p>
                             <p class="text-[9px] text-indigo-500 font-mono font-bold">NIP: ${emp.nip}</p>
+                            <p class="text-[9px] text-emerald-600 font-mono font-bold mt-0.5">TKD: ${formatRupiah(emp.besaranTKD)} &bull; PPh 21: ${emp.pph21 || 0}%</p>
                         </div>
                         <div class="flex space-x-1.5">
                             <button onclick="editEmployee(${emp.id})" class="w-8 h-8 bg-slate-50 text-slate-500 hover:bg-slate-100 rounded-lg flex items-center justify-center text-xs transition-all">
@@ -985,6 +1057,10 @@
                             <span>Predikat: <strong>${item.pred}</strong></span>
                             <span>Rata-Rata: <strong class="text-indigo-600">${average}</strong></span>
                         </div>
+                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                            <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Jumlah Maksimal TKD Diterima</p>
+                            <p class="text-sm font-black text-emerald-700">${formatRupiah(hitungTKDDiterima(emp.besaranTKD, item.pred, emp.pph21))}</p>
+                        </div>
                     </div>
                 `;
                 container.innerHTML += cardHtml;
@@ -1013,6 +1089,8 @@
             document.getElementById('empGol').value = "";
             document.getElementById('empJabatan').value = "";
             document.getElementById('empType').value = "struktural";
+            document.getElementById('empBesaranTKD').value = "";
+            document.getElementById('empPph21').value = "";
             document.getElementById('modalEmpTitle').textContent = "Tambah Pegawai Baru";
             document.getElementById('employeeModal').classList.remove('hidden');
         }
@@ -1031,6 +1109,8 @@
             document.getElementById('empGol').value = emp.gol;
             document.getElementById('empJabatan').value = emp.jabatan;
             document.getElementById('empType').value = emp.type;
+            document.getElementById('empBesaranTKD').value = emp.besaranTKD || 0;
+            document.getElementById('empPph21').value = emp.pph21 || 0;
             document.getElementById('modalEmpTitle').textContent = "Edit Data Pegawai";
 
             document.getElementById('employeeModal').classList.remove('hidden');
@@ -1043,6 +1123,8 @@
             const gol = document.getElementById('empGol').value;
             const jabatan = document.getElementById('empJabatan').value;
             const type = document.getElementById('empType').value;
+            const besaranTKD = parseFloat(document.getElementById('empBesaranTKD').value) || 0;
+            const pph21 = parseFloat(document.getElementById('empPph21').value) || 0;
 
             if (!name || !nip || !gol || !jabatan) {
                 alert("Harap lengkapi semua isian formulir!");
@@ -1050,10 +1132,10 @@
             }
 
             if (id) {
-                employees = employees.map(e => e.id === parseInt(id) ? { id: parseInt(id), name, nip, gol, jabatan, type } : e);
+                employees = employees.map(e => e.id === parseInt(id) ? { id: parseInt(id), name, nip, gol, jabatan, type, besaranTKD, pph21 } : e);
             } else {
                 const newId = Date.now();
-                employees.push({ id: newId, name, nip, gol, jabatan, type });
+                employees.push({ id: newId, name, nip, gol, jabatan, type, besaranTKD, pph21 });
             }
 
             localStorage.setItem('tutuyan_pwa_employees', JSON.stringify(employees));
