@@ -259,25 +259,6 @@
         </nav>
     </div>
 
-    <!-- REALISTIC WHATSAPP NOTIFICATION MOCK (SMARTPHONE TOAST) -->
-    <div id="waNotifToast" class="fixed top-4 left-4 right-4 z-50 transform -translate-y-32 transition-transform duration-500 ease-out pointer-events-none">
-        <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-2xl border border-emerald-500 flex items-start space-x-3 max-w-md mx-auto">
-            <div class="bg-white/20 p-2 rounded-xl text-white">
-                <i class="fa-brands fa-whatsapp text-2xl"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-center mb-0.5">
-                    <p class="text-[10px] font-black uppercase tracking-wider text-emerald-200">WhatsApp Kasubag Kepegawaian</p>
-                    <span class="text-[8px] font-bold opacity-60">Baru Saja</span>
-                </div>
-                <p id="waText" class="text-xs font-semibold leading-relaxed break-words"></p>
-                <div class="mt-2 text-[10px] font-bold text-emerald-100 flex items-center gap-1">
-                    <i class="fa-solid fa-link text-[8px]"></i> Link web app terlampir
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL: ADD / EDIT EMPLOYEE -->
     <div id="employeeModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-100 transform transition-all translate-y-0">
@@ -642,22 +623,12 @@
         }
 
         function triggerWaNotification(message) {
-            const toast = document.getElementById('waNotifToast');
-            const txt = document.getElementById('waText');
-            
+            // Perbaikan: toast mock/visual di dalam aplikasi sudah dihapus.
+            // Fungsi ini sekarang murni memicu pengiriman WhatsApp sungguhan via Fonnte.
             const appLink = window.location.href;
-            txt.innerHTML = `${message}<br><span class="text-indigo-200 underline font-mono text-[10px] break-all">${appLink}</span>`;
+            const fullMessage = `${message}\n\nSilahkan periksa di :\n${appLink}\ndengan menggunakan akun Kasubag Kepegawaian`;
 
-            toast.classList.remove('-translate-y-32');
-            
-            setTimeout(() => {
-                toast.classList.add('-translate-y-32');
-            }, 6000);
-
-            // Kirim notifikasi WhatsApp sungguhan lewat Fonnte ke nomor yang didaftarkan Admin.
-            // Toast di atas tetap tampil sebagai feedback visual di dalam aplikasi;
-            // ini adalah pengiriman nyata ke perangkat WhatsApp Kasubag/pihak terkait.
-            sendWhatsAppNotification(`${message}\n\n${appLink}`);
+            sendWhatsAppNotification(fullMessage);
         }
 
         // Mengirim pesan WhatsApp nyata via Fonnte API ke semua nomor terdaftar
