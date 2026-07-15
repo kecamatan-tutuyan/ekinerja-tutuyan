@@ -153,6 +153,9 @@
                 <button onclick="switchAdminSubTab('nilai')" id="adminTabNilai" class="flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold text-slate-500 transition-all">
                     Pantau Semua Nilai
                 </button>
+                <button onclick="switchAdminSubTab('notifikasi')" id="adminTabNotifikasi" class="flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold text-slate-500 transition-all">
+                    Notifikasi WA
+                </button>
             </div>
 
             <!-- Section 1: Daftar Pegawai -->
@@ -163,6 +166,43 @@
             <!-- Section 2: Pantau Nilai -->
             <div id="adminNilaiSection" class="space-y-3 hidden">
                 <!-- Injected via JS -->
+            </div>
+
+            <!-- Section 2b: Notifikasi WhatsApp (Fonnte) -->
+            <div id="adminWaSection" class="space-y-3 hidden">
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-4">
+                    <h4 class="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5 text-emerald-600">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Token API Fonnte
+                    </h4>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Token Perangkat Fonnte</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="waTokenInput" placeholder="Tempel token dari dashboard Fonnte" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 font-mono">
+                            <button onclick="toggleWaTokenVisibility()" class="w-11 h-11 flex-shrink-0 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-500 flex items-center justify-center transition-all">
+                                <i id="waTokenToggleIcon" class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                        <p class="text-[9px] text-slate-400 font-semibold mt-1.5 leading-relaxed">Ambil dari menu Device di akun Fonnte Anda. Token ini dipakai untuk mengirim notifikasi WhatsApp otomatis.</p>
+                    </div>
+                    <button onclick="saveWaToken()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-center rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-transform text-xs">
+                        Simpan Token
+                    </button>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-4">
+                    <h4 class="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5 text-indigo-600">
+                        <i class="fa-solid fa-address-book text-[10px]"></i> Nomor Penerima Notifikasi
+                    </h4>
+                    <div class="flex gap-2">
+                        <input type="tel" id="newWaNumber" placeholder="Contoh: 081234567890" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="addWaNumber()" class="w-11 h-11 flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl flex items-center justify-center active:scale-95 transition-transform">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="waNumberListContainer" class="space-y-2">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
             </div>
 
             <!-- Section 3: Monitoring PIN (Hanya Tampil Untuk Admin) -->
@@ -350,6 +390,15 @@
         let config = JSON.parse(localStorage.getItem('tutuyan_pwa_config')) || {
             pins: { camat: "123456", kasubag: "123456", admin: "123456" }
         };
+        // Fitur Notifikasi WA (Fonnte): normalisasi agar config lama (belum punya field wa) tetap aman
+        if (!config.wa) {
+            config.wa = { token: "", numbers: [] };
+        }
+        if (!Array.isArray(config.wa.numbers)) {
+            config.wa.numbers = [];
+        }
+
+        let waTokenVisible = false;
 
         let currentActiveRole = 'camat';
         let loggedInRole = ''; 
@@ -443,11 +492,14 @@
                         const data = snapshot.val();
                         if (data) {
                             config = data;
+                            if (!config.wa) config.wa = { token: "", numbers: [] };
+                            if (!Array.isArray(config.wa.numbers)) config.wa.numbers = [];
                             localStorage.setItem('tutuyan_pwa_config', JSON.stringify(config));
                         } else {
                             database.ref('config').set(config);
                         }
                         renderPinMonitor();
+                        if (currentAdminSubTab === 'notifikasi') renderWaSettings();
                     });
 
                 } catch (error) {
@@ -601,6 +653,46 @@
             setTimeout(() => {
                 toast.classList.add('-translate-y-32');
             }, 6000);
+
+            // Kirim notifikasi WhatsApp sungguhan lewat Fonnte ke nomor yang didaftarkan Admin.
+            // Toast di atas tetap tampil sebagai feedback visual di dalam aplikasi;
+            // ini adalah pengiriman nyata ke perangkat WhatsApp Kasubag/pihak terkait.
+            sendWhatsAppNotification(`${message}\n\n${appLink}`);
+        }
+
+        // Mengirim pesan WhatsApp nyata via Fonnte API ke semua nomor terdaftar
+        async function sendWhatsAppNotification(message) {
+            const waCfg = config.wa || {};
+            const token = (waCfg.token || '').trim();
+            const numbers = waCfg.numbers || [];
+
+            if (!token || numbers.length === 0) {
+                console.warn('[Notifikasi WA] Belum dikirim: Token Fonnte atau daftar nomor penerima belum diatur di menu Admin > Notifikasi WA.');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('target', numbers.join(','));
+                formData.append('message', message);
+                formData.append('countryCode', '62');
+
+                const response = await fetch('https://api.fonnte.com/send', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Authorization': token },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (!result.status) {
+                    console.error('[Notifikasi WA] Gagal mengirim:', result);
+                } else {
+                    console.log('[Notifikasi WA] Berhasil dikirim ke:', numbers.join(', '));
+                }
+            } catch (err) {
+                console.error('[Notifikasi WA] Terjadi kesalahan saat mengirim:', err);
+            }
         }
 
         // Menampilkan UI Utama Camat (Berbasis Kartu Dinamis)
@@ -724,22 +816,126 @@
         // Sub-Tab Admin
         function switchAdminSubTab(tab) {
             currentAdminSubTab = tab;
-            const btnPegawai = document.getElementById('adminTabPegawai');
-            const btnNilai = document.getElementById('adminTabNilai');
-            const secPegawai = document.getElementById('adminPegawaiSection');
-            const secNilai = document.getElementById('adminNilaiSection');
 
-            if (tab === 'pegawai') {
-                btnPegawai.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold bg-white text-indigo-600 shadow-sm transition-all";
-                btnNilai.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold text-slate-500 transition-all";
-                secPegawai.classList.remove('hidden');
-                secNilai.classList.add('hidden');
-            } else {
-                btnNilai.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold bg-white text-indigo-600 shadow-sm transition-all";
-                btnPegawai.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold text-slate-500 transition-all";
-                secNilai.classList.remove('hidden');
-                secPegawai.classList.add('hidden');
+            const tabs = {
+                pegawai: { btn: 'adminTabPegawai', sec: 'adminPegawaiSection' },
+                nilai: { btn: 'adminTabNilai', sec: 'adminNilaiSection' },
+                notifikasi: { btn: 'adminTabNotifikasi', sec: 'adminWaSection' }
+            };
+
+            Object.keys(tabs).forEach((key) => {
+                const btn = document.getElementById(tabs[key].btn);
+                const sec = document.getElementById(tabs[key].sec);
+                if (!btn || !sec) return;
+                if (key === tab) {
+                    btn.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold bg-white text-indigo-600 shadow-sm transition-all";
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.className = "flex-1 text-center py-2.5 rounded-xl text-xs font-extrabold text-slate-500 transition-all";
+                    sec.classList.add('hidden');
+                }
+            });
+
+            if (tab === 'nilai') {
                 renderAdminMonitoringNilai();
+            } else if (tab === 'notifikasi') {
+                renderWaSettings();
+            }
+        }
+
+        // ===== KELOLA NOTIFIKASI WHATSAPP (FONNTE) =====
+        function renderWaSettings() {
+            if (!config.wa) config.wa = { token: "", numbers: [] };
+            const tokenInput = document.getElementById('waTokenInput');
+            if (tokenInput) tokenInput.value = config.wa.token || '';
+            renderWaNumberList();
+        }
+
+        function renderWaNumberList() {
+            const container = document.getElementById('waNumberListContainer');
+            if (!container) return;
+
+            const numbers = (config.wa && config.wa.numbers) || [];
+
+            if (numbers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <p class="text-[10px] font-bold text-slate-400">Belum ada nomor WhatsApp terdaftar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = numbers.map((num, idx) => `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl">
+                    <span class="text-sm font-extrabold text-slate-700 font-mono">${num}</span>
+                    <button onclick="removeWaNumber(${idx})" class="text-rose-500 hover:text-rose-700 text-xs font-bold bg-rose-100 hover:bg-rose-200 px-3 py-1.5 rounded-xl">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addWaNumber() {
+            const input = document.getElementById('newWaNumber');
+            let num = input.value.trim().replace(/[\s\-()]/g, ''); // buang spasi/strip/kurung
+
+            // Validasi: hanya boleh format 08xxxxxxxxxx atau 62xxxxxxxxxx (8-15 digit setelah awalan)
+            const validLokal = /^0[0-9]{8,14}$/.test(num);
+            const validInternasional = /^62[0-9]{8,14}$/.test(num);
+
+            if (!validLokal && !validInternasional) {
+                alert("Format nomor tidak valid. Gunakan format 08xxxxxxxxxx atau 62xxxxxxxxxx (hanya angka).");
+                return;
+            }
+
+            // Normalisasi ke format 62xxxx (format yang dibutuhkan Fonnte)
+            if (validLokal) {
+                num = '62' + num.substring(1);
+            }
+
+            if (!config.wa) config.wa = { token: "", numbers: [] };
+            if (!Array.isArray(config.wa.numbers)) config.wa.numbers = [];
+
+            if (config.wa.numbers.includes(num)) {
+                alert("Nomor ini sudah terdaftar di daftar penerima notifikasi.");
+                return;
+            }
+
+            config.wa.numbers.push(num);
+            saveWaConfig();
+            input.value = '';
+        }
+
+        function removeWaNumber(idx) {
+            if (!confirm("Hapus nomor ini dari daftar penerima notifikasi WhatsApp?")) return;
+            config.wa.numbers.splice(idx, 1);
+            saveWaConfig();
+        }
+
+        function toggleWaTokenVisibility() {
+            waTokenVisible = !waTokenVisible;
+            const input = document.getElementById('waTokenInput');
+            const icon = document.getElementById('waTokenToggleIcon');
+            input.type = waTokenVisible ? 'text' : 'password';
+            icon.className = waTokenVisible ? 'fa-solid fa-eye-slash text-xs' : 'fa-solid fa-eye text-xs';
+        }
+
+        function saveWaToken() {
+            const tokenInput = document.getElementById('waTokenInput');
+            if (!config.wa) config.wa = { token: "", numbers: [] };
+            config.wa.token = tokenInput.value.trim();
+            saveWaConfig();
+            alert("Token Fonnte berhasil disimpan.");
+        }
+
+        // Simpan config.wa ke localStorage + Firebase (mengikuti pola config.pins yang sudah ada)
+        function saveWaConfig() {
+            localStorage.setItem('tutuyan_pwa_config', JSON.stringify(config));
+            if (isOnline) {
+                database.ref('config').set(config);
+            } else {
+                renderWaNumberList();
             }
         }
 
@@ -771,6 +967,8 @@
 
             if (currentAdminSubTab === 'nilai') {
                 renderAdminMonitoringNilai();
+            } else if (currentAdminSubTab === 'notifikasi') {
+                renderWaSettings();
             }
 
             renderPinMonitor();
