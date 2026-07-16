@@ -1221,12 +1221,11 @@
                 database.ref('ketidakhadiran/' + record.id).set(record);
             }
 
-            // Notifikasi WA otomatis ke Camat (memakai infrastruktur Fonnte yang sudah ada)
-            let pesanWA = `Pemberitahuan Ketidakhadiran dari *${emp.name}* (${emp.jabatan}).\n\nTanggal: ${formatTanggalIndo(tglMulai)} s/d ${formatTanggalIndo(tglSelesai)} (${jumlahHariBaru} hari)\nAlasan: ${alasan}\nDokumen: *${status.jenisDokumen}*`;
-            if (status.pesan) {
-                pesanWA += `\n\n${status.pesan}`;
-            }
-            triggerWaNotification(pesanWA);
+            // Notifikasi WA real-time ke grup WhatsApp kantor (memakai infrastruktur Fonnte yang sudah ada).
+            // Catatan: alasan ketidakhadiran SENGAJA tidak disertakan di pesan WA demi privasi pegawai —
+            // pesan dibuat generik (permohonan izin), rincian alasan hanya terlihat di dalam aplikasi.
+            const pesanWA = `Yth. Ibu Camat, saya *${emp.name}* (${emp.jabatan}) memohon izin untuk belum masuk kantor dari tanggal *${formatTanggalIndo(tglMulai)}* hingga tanggal *${formatTanggalIndo(tglSelesai)}* (${jumlahHariBaru} hari).`;
+            sendWhatsAppNotification(pesanWA);
 
             alert("Pemberitahuan ketidakhadiran berhasil dikirim.");
 
