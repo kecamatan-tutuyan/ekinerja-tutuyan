@@ -1618,6 +1618,25 @@
                 return;
             }
 
+            // Perbaikan bug: BACA status checkbox & SUSUN pesan WA SEBELUM menulis apa pun ke
+            // Firebase. Sebelumnya, pembacaan checkbox dilakukan SETELAH data ditulis ke
+            // Firebase — dan penulisan itu memicu sinkronisasi real-time yang langsung
+            // menggambar ulang seluruh tampilan (termasuk checkbox-nya, kembali ke kondisi
+            // tidak tercentang) SEBELUM sempat dibaca. Akibatnya alasan yang sudah dicentang
+            // pegawai selalu gagal ikut terkirim. Sekarang dibaca & disusun di awal, memakai
+            // nilai yang sudah "diamankan" ke variabel biasa, bukan dibaca ulang dari DOM
+            // setelah kemungkinan sempat digambar ulang.
+            const sertakanAlasan = document.getElementById('sertakanAlasanWA').checked;
+
+            // Perbaikan: kalau ketidakhadiran cuma 1 hari (tanggal mulai = tanggal selesai),
+            // kalimatnya disederhanakan jadi "pada tanggal X" saja, bukan "dari tanggal X
+            // hingga tanggal X (1 hari)" yang terdengar janggal untuk kasus 1 hari.
+            const rentangTanggalText = (tglMulai === tglSelesai)
+                ? `pada tanggal *${formatTanggalIndo(tglMulai)}*`
+                : `dari tanggal *${formatTanggalIndo(tglMulai)}* hingga tanggal *${formatTanggalIndo(tglSelesai)}* (${jumlahHariBaru} hari)`;
+
+            const pesanWA = `Yth. Ibu Camat, saya *${emp.name}* (${emp.jabatan}) memohon izin untuk belum masuk kantor ${rentangTanggalText}${sertakanAlasan ? ` karena *${alasan}*` : ''}.`;
+
             const record = {
                 id: Date.now(),
                 empId: emp.id,
@@ -1638,11 +1657,7 @@
             }
 
             // Notifikasi WA real-time ke grup WhatsApp kantor (memakai infrastruktur Fonnte yang sudah ada).
-            // Pegawai sekarang bisa MEMILIH sendiri apakah alasan ketidakhadirannya ikut
-            // disebutkan di pesan WA atau tidak, lewat checkbox "Sertakan alasan..." di form.
-            // Kalau disertakan, alasan disambung dalam satu kalimat memakai kata "karena".
-            const sertakanAlasan = document.getElementById('sertakanAlasanWA').checked;
-            const pesanWA = `Yth. Ibu Camat, saya *${emp.name}* (${emp.jabatan}) memohon izin untuk belum masuk kantor dari tanggal *${formatTanggalIndo(tglMulai)}* hingga tanggal *${formatTanggalIndo(tglSelesai)}* (${jumlahHariBaru} hari)${sertakanAlasan ? ` karena *${alasan}*` : ''}.`;
+            // Pesan sudah disusun di atas SEBELUM data ditulis ke Firebase (lihat catatan perbaikan bug di atas).
             sendWhatsAppNotification(pesanWA, 'ketidakhadiran');
 
             alert("Pemberitahuan ketidakhadiran berhasil dikirim.");
